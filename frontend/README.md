@@ -131,6 +131,44 @@ npm run build
 
 ---
 
+## 🌐 Hosting on Vercel
+
+The frontend is fully configured for deployment on [Vercel](https://vercel.com).
+
+### Option A: Deploy via Vercel Web Dashboard (Recommended)
+
+1. **Push your code to GitHub / GitLab / Bitbucket**.
+2. Go to **[vercel.com/new](https://vercel.com/new)** and import your repository.
+3. Configure the project:
+   * **Framework Preset**: Vite
+   * **Root Directory**: Select `frontend` (or leave default if deploying from repository root, handled by root `vercel.json`).
+   * **Build Command**: `npm run build`
+   * **Output Directory**: `dist`
+4. **Environment Variables**:
+   * Under **Environment Variables**, add:
+     * `VITE_API_URL`: Your deployed backend API URL (e.g. `https://your-backend-service.onrender.com/api`)
+5. Click **Deploy**.
+
+### Option B: Deploy via Vercel CLI
+
+```powershell
+cd frontend
+# Install Vercel CLI if needed
+npm install -g vercel
+
+# Deploy preview
+vercel
+
+# Deploy to production
+vercel --prod
+```
+
+### SPA Routing & Deep Linking
+* Both `frontend/vercel.json` and root `vercel.json` include rewrite rules (`"source": "/(.*)", "destination": "/index.html"`).
+* This prevents `404 Not Found` errors when refreshing routes such as `/admin/login`, `/products/:slug`, or `/orders`.
+
+---
+
 ## 📦 Tech Stack Summary
 
 * **Frontend**: React 19, Vite, TailwindCSS, React Router v7, TanStack Query, Recharts, Lucide Icons, Zod.
