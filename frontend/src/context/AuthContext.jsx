@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const isAuthenticated = !!user && !!token;
-  const isAdmin = user?.role === 'ADMIN';
+  const isAdmin = String(user?.role || '').toUpperCase() === 'ADMIN';
 
   return (
     <AuthContext.Provider value={{

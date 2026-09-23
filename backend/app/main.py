@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -16,15 +17,34 @@ from app.routers import (
     reviews,
     coupons,
     admin,
-    analytics
+    analytics,
+    suppliers
 )
+from app.routers.ai_router import router as ai_router
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Startup and shutdown lifecycle events."""
+    # ── Startup ─────────────────────────────────────────
+    from app.jobs.scheduler import start_scheduler
+    start_scheduler()
+    yield
+    # ── Shutdown ────────────────────────────────────────
+    from app.jobs.scheduler import stop_scheduler
+    stop_scheduler()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    description="SHOPERA - Enterprise Grade E-Commerce API with MySQL, JWT Authentication, and Full Commerce Lifecycle",
-    version="1.0.0",
+    description=(
+        "SHOPERA — AI-Native Ecommerce & Supply Chain Intelligence Platform. "
+        "Full ecommerce lifecycle + demand forecasting, inventory intelligence, "
+        "customer segmentation, anomaly detection, and AI agents."
+    ),
+    version="2.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    lifespan=lifespan,
 )
 
 # Configure CORS
@@ -88,6 +108,8 @@ app.include_router(reviews.router, prefix=api_prefix)
 app.include_router(coupons.router, prefix=api_prefix)
 app.include_router(admin.router, prefix=api_prefix)
 app.include_router(analytics.router, prefix=api_prefix)
+app.include_router(suppliers.router)
+app.include_router(ai_router)  # ai_router already includes /api/ai prefix
 
 @app.get("/", tags=["Health"])
 def root():
@@ -100,7 +122,9 @@ def root():
 
 @app.get("/api/health", tags=["Health"])
 def health_check():
+    from datetime import datetime, timezone
     return {
         "status": "healthy",
-        "timestamp": "2026-09-21T15:30:00Z"
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "version": "2.0.0",
     }

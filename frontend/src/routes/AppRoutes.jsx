@@ -38,6 +38,15 @@ import { Analytics as AdminAnalytics } from '../pages/admin/Analytics';
 import { Settings as AdminSettings } from '../pages/admin/Settings';
 import { AdminLogin } from '../pages/admin/AdminLogin';
 
+// AI Intelligence Suite
+import AICommandCenter from '../pages/admin/ai/AICommandCenter';
+import InventoryRiskPage from '../pages/admin/ai/InventoryRiskPage';
+import DemandForecastingPage from '../pages/admin/ai/DemandForecastingPage';
+import AlertCenterPage from '../pages/admin/ai/AlertCenterPage';
+import CustomerIntelligencePage from '../pages/admin/ai/CustomerIntelligencePage';
+import AnomalyDetectionPage from '../pages/admin/ai/AnomalyDetectionPage';
+import RecommendationsPage from '../pages/admin/ai/RecommendationsPage';
+
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -104,7 +113,9 @@ export const AppRoutes = () => {
         <Route index element={<AdminDashboard />} />
         <Route path="products" element={<AdminProducts />} />
         <Route path="products/create" element={<AdminCreateProduct />} />
+        <Route path="products/new" element={<AdminCreateProduct />} />
         <Route path="products/edit/:id" element={<AdminEditProduct />} />
+        <Route path="products/:id/edit" element={<AdminEditProduct />} />
         <Route path="categories" element={<AdminCategories />} />
         <Route path="orders" element={<AdminOrders />} />
         <Route path="customers" element={<AdminCustomers />} />
@@ -113,6 +124,15 @@ export const AppRoutes = () => {
         <Route path="reviews" element={<AdminReviews />} />
         <Route path="analytics" element={<AdminAnalytics />} />
         <Route path="settings" element={<AdminSettings />} />
+
+        {/* AI Supply Chain Intelligence Suite */}
+        <Route path="ai" element={<AICommandCenter />} />
+        <Route path="ai/inventory" element={<InventoryRiskPage />} />
+        <Route path="ai/forecasting" element={<DemandForecastingPage />} />
+        <Route path="ai/alerts" element={<AlertCenterPage />} />
+        <Route path="ai/customers" element={<CustomerIntelligencePage />} />
+        <Route path="ai/anomalies" element={<AnomalyDetectionPage />} />
+        <Route path="ai/recommendations" element={<RecommendationsPage />} />
       </Route>
 
       {/* Fallback wildcard */}

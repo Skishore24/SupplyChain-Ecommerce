@@ -91,12 +91,13 @@ export const Analytics = () => {
           </div>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="font-serif text-3xl font-bold text-slate-900">
-              ${parseFloat(metrics.revenue?.current || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              {metrics.revenue?.formatted_value || formatPrice(metrics.revenue?.current_value || metrics.revenue?.current || 0)}
             </span>
           </div>
           <div className="mt-2 flex items-center gap-1.5 text-xs">
-            <span className="flex items-center font-bold text-emerald-600">
-              <ArrowUpRight className="h-3.5 w-3.5" /> +{metrics.revenue?.growth_rate || 0}%
+            <span className={`flex items-center font-bold ${metrics.revenue?.is_positive !== false ? 'text-emerald-600' : 'text-rose-600'}`}>
+              {metrics.revenue?.is_positive !== false ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
+              {metrics.revenue?.percentage_change ?? metrics.revenue?.growth_rate ?? 0}%
             </span>
             <span className="text-slate-400">vs prior period</span>
           </div>
@@ -112,12 +113,13 @@ export const Analytics = () => {
           </div>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="font-serif text-3xl font-bold text-slate-900">
-              {metrics.orders?.current || 0}
+              {metrics.orders?.formatted_value || metrics.orders?.current_value || metrics.orders?.current || 0}
             </span>
           </div>
           <div className="mt-2 flex items-center gap-1.5 text-xs">
-            <span className="flex items-center font-bold text-emerald-600">
-              <ArrowUpRight className="h-3.5 w-3.5" /> +{metrics.orders?.growth_rate || 0}%
+            <span className={`flex items-center font-bold ${metrics.orders?.is_positive !== false ? 'text-emerald-600' : 'text-rose-600'}`}>
+              {metrics.orders?.is_positive !== false ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
+              {metrics.orders?.percentage_change ?? metrics.orders?.growth_rate ?? 0}%
             </span>
             <span className="text-slate-400">vs prior period</span>
           </div>
@@ -133,7 +135,7 @@ export const Analytics = () => {
           </div>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="font-serif text-3xl font-bold text-slate-900">
-              {formatPrice(metrics.aov?.current || 0)}
+              {metrics.aov?.formatted_value || formatPrice(metrics.aov?.current_value || metrics.aov?.current || 0)}
             </span>
           </div>
           <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
@@ -151,7 +153,7 @@ export const Analytics = () => {
           </div>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="font-serif text-3xl font-bold text-slate-900">
-              {data?.repeat_customer_rate || 0}%
+              {typeof data?.repeat_customer_rate === 'object' ? (data?.repeat_customer_rate?.repeat_rate ?? 0) : (data?.repeat_customer_rate || 0)}%
             </span>
           </div>
           <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
@@ -192,7 +194,7 @@ export const Analytics = () => {
                   formatter={(val) => [formatPrice(val), 'Revenue']}
                   contentStyle={{ backgroundColor: '#0F172A', borderRadius: '12px', color: '#fff', border: 'none' }}
                 />
-                <Area type="monotone" dataKey="amount" stroke="#2563EB" strokeWidth={2.5} fillOpacity={1} fill="url(#revenueGrad)" />
+                <Area type="monotone" dataKey="revenue" stroke="#2563EB" strokeWidth={2.5} fillOpacity={1} fill="url(#revenueGrad)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -216,7 +218,7 @@ export const Analytics = () => {
                   formatter={(val) => [val, 'Orders']}
                   contentStyle={{ backgroundColor: '#0F172A', borderRadius: '12px', color: '#fff', border: 'none' }}
                 />
-                <Bar dataKey="count" fill="#0F172A" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="orders_count" fill="#0F172A" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -238,8 +240,8 @@ export const Analytics = () => {
                 <PieChart>
                   <Pie
                     data={categorySales}
-                    dataKey="revenue"
-                    nameKey="category"
+                    dataKey="sales"
+                    nameKey="category_name"
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
@@ -277,7 +279,7 @@ export const Analytics = () => {
                   formatter={(val) => [val, 'New Users']}
                   contentStyle={{ backgroundColor: '#0F172A', borderRadius: '12px', color: '#fff', border: 'none' }}
                 />
-                <Area type="monotone" dataKey="count" stroke="#0D9488" strokeWidth={2.5} fill="#CCFBF1" />
+                <Area type="monotone" dataKey="new_customers" stroke="#0D9488" strokeWidth={2.5} fill="#CCFBF1" />
               </AreaChart>
             </ResponsiveContainer>
           </div>

@@ -12,7 +12,15 @@ import {
   BarChart3,
   Settings,
   ArrowUpRight,
-  LogOut
+  LogOut,
+  Sparkles,
+  Cpu,
+  AlertTriangle,
+  TrendingUp,
+  Bell,
+  UserCheck,
+  Activity,
+  Lightbulb
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -32,6 +40,16 @@ export const AdminSidebar = ({ mobileOpen, setMobileOpen }) => {
     { label: 'Settings', to: '/admin/settings', icon: Settings },
   ];
 
+  const aiNavItems = [
+    { label: 'AI Command Center', to: '/admin/ai', icon: Cpu, exact: true },
+    { label: 'Inventory Risk', to: '/admin/ai/inventory', icon: AlertTriangle },
+    { label: 'Demand Forecasting', to: '/admin/ai/forecasting', icon: TrendingUp },
+    { label: 'Supply Chain Alerts', to: '/admin/ai/alerts', icon: Bell },
+    { label: 'Customer Intelligence', to: '/admin/ai/customers', icon: UserCheck },
+    { label: 'Anomaly Detection', to: '/admin/ai/anomalies', icon: Activity },
+    { label: 'AI Recommendations', to: '/admin/ai/recommendations', icon: Lightbulb },
+  ];
+
   return (
     <>
       {/* Mobile backdrop */}
@@ -47,9 +65,9 @@ export const AdminSidebar = ({ mobileOpen, setMobileOpen }) => {
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div>
+        <div className="flex-1 overflow-y-auto">
           {/* Logo */}
-          <div className="h-16 px-6 border-b border-line flex items-center justify-between">
+          <div className="h-16 px-6 border-b border-line flex items-center justify-between sticky top-0 bg-surface/95 backdrop-blur z-10">
             <Link to="/admin" className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-primary text-white flex items-center justify-center font-bold text-sm shadow-subtle">
                 S
@@ -71,8 +89,52 @@ export const AdminSidebar = ({ mobileOpen, setMobileOpen }) => {
             </Link>
           </div>
 
-          {/* Navigation Links */}
-          <div className="p-3 space-y-1">
+          {/* AI Intelligence Section */}
+          <div className="p-3 pb-0">
+            <div className="px-3 py-1.5 mb-1 flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 flex items-center gap-1.5">
+                <Sparkles className="w-3 h-3" />
+                AI Intelligence
+              </span>
+              <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 border border-indigo-200/60">
+                PRO
+              </span>
+            </div>
+            <div className="space-y-0.5">
+              {aiNavItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.exact}
+                    onClick={() => setMobileOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 rounded-btn text-xs font-semibold transition-all ${
+                        isActive
+                          ? 'bg-indigo-50 text-indigo-600 font-bold border border-indigo-100'
+                          : 'text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/50'
+                      }`
+                    }
+                  >
+                    <Icon className="w-4 h-4 shrink-0 text-indigo-500" />
+                    <span>{item.label}</span>
+                  </NavLink>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="mx-3 my-2 border-t border-line/60" />
+
+          {/* Core Ecommerce Navigation Links */}
+          <div className="p-3 pt-0 space-y-0.5">
+            <div className="px-3 py-1.5 mb-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-ink-muted">
+                Core Operations
+              </span>
+            </div>
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -82,7 +144,7 @@ export const AdminSidebar = ({ mobileOpen, setMobileOpen }) => {
                   end={item.exact}
                   onClick={() => setMobileOpen(false)}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2.5 rounded-btn text-xs font-semibold transition-all ${
+                    `flex items-center gap-3 px-3 py-2 rounded-btn text-xs font-semibold transition-all ${
                       isActive
                         ? 'bg-blue-50 text-accent font-bold'
                         : 'text-ink-secondary hover:text-ink-primary hover:bg-slate-50'
