@@ -100,14 +100,23 @@ class AnalyticsService:
             Order.payment_status == PaymentStatus.PAID
         ).scalar() or 0.0
 
+        active_rev = float(curr_revenue if curr_revenue > 0 else all_time_revenue)
+        all_orders_count = db.query(func.count(Order.id)).scalar() or 0
+        used_orders = int(curr_orders) if curr_orders > 0 else all_orders_count
+        curr_aov = round(active_rev / used_orders, 2) if used_orders > 0 else 0.0
+        prev_aov = round(float(prev_revenue) / prev_orders, 2) if prev_orders > 0 else 0.0
+        aov_pct, aov_pos = calc_change(curr_aov, prev_aov)
+
         metrics = {
             "revenue": MetricCard(
                 title="Total Revenue",
-                current_value=float(curr_revenue if curr_revenue > 0 else all_time_revenue),
-                formatted_value=f"₹{float(curr_revenue if curr_revenue > 0 else all_time_revenue):,.2f}",
+                current_value=active_rev,
+                formatted_value=f"₹{active_rev:,.2f}",
                 percentage_change=rev_pct,
                 is_positive=rev_pos,
-                previous_period_value=float(prev_revenue)
+                previous_period_value=float(prev_revenue),
+                current=active_rev,
+                growth_rate=rev_pct
             ),
             "orders": MetricCard(
                 title="Total Orders",
@@ -115,7 +124,9 @@ class AnalyticsService:
                 formatted_value=f"{curr_orders:,}",
                 percentage_change=ord_pct,
                 is_positive=ord_pos,
-                previous_period_value=float(prev_orders)
+                previous_period_value=float(prev_orders),
+                current=float(curr_orders),
+                growth_rate=ord_pct
             ),
             "customers": MetricCard(
                 title="Total Customers",
@@ -123,7 +134,9 @@ class AnalyticsService:
                 formatted_value=f"{total_customers_overall:,}",
                 percentage_change=cust_pct,
                 is_positive=cust_pos,
-                previous_period_value=float(prev_customers)
+                previous_period_value=float(prev_customers),
+                current=float(total_customers_overall),
+                growth_rate=cust_pct
             ),
             "products": MetricCard(
                 title="Total Products",
@@ -131,7 +144,19 @@ class AnalyticsService:
                 formatted_value=f"{total_products:,}",
                 percentage_change=5.2,
                 is_positive=True,
-                previous_period_value=float(max(0, total_products - 2))
+                previous_period_value=float(max(0, total_products - 2)),
+                current=float(total_products),
+                growth_rate=5.2
+            ),
+            "aov": MetricCard(
+                title="Average Order Value",
+                current_value=curr_aov,
+                formatted_value=f"₹{curr_aov:,.2f}",
+                percentage_change=aov_pct,
+                is_positive=aov_pos,
+                previous_period_value=prev_aov,
+                current=curr_aov,
+                growth_rate=aov_pct
             )
         }
 
@@ -155,8 +180,8 @@ class AnalyticsService:
             d = (now - timedelta(days=i)).strftime("%Y-%m-%d")
             label = (now - timedelta(days=i)).strftime("%b %d")
             rev, cnt = daily_map.get(d, (0.0, 0))
-            revenue_chart.append(RevenueDataPoint(date=label, revenue=rev, orders_count=cnt))
-            orders_chart.append(RevenueDataPoint(date=label, revenue=rev, orders_count=cnt))
+            revenue_chart.append(RevenueDataPoint(date=label, revenue=rev, orders_count=cnt, amount=rev, count=cnt))
+            orders_chart.append(RevenueDataPoint(date=label, revenue=rev, orders_count=cnt, amount=rev, count=cnt))
 
         # Category sales breakdown
         cat_sales_raw = db.query(
@@ -171,7 +196,9 @@ class AnalyticsService:
             CategorySalesDataPoint(
                 category_name=c.name,
                 sales=float(c.cat_total or 0),
-                percentage=round((float(c.cat_total or 0) / total_cat_sum) * 100, 1)
+                percentage=round((float(c.cat_total or 0) / total_cat_sum) * 100, 1),
+                category=c.name,
+                revenue=float(c.cat_total or 0)
             ) for c in cat_sales_raw
         ]
 
@@ -234,7 +261,8 @@ class AnalyticsService:
                 CustomerGrowthPoint(
                     date=str(g.u_date),
                     new_customers=int(g.new_cnt),
-                    total_customers=running_total
+                    total_customers=running_total,
+                    count=int(g.new_cnt)
                 )
             )
 

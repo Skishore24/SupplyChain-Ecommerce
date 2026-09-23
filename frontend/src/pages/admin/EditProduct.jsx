@@ -54,7 +54,7 @@ export const EditProduct = () => {
         name: p.name || '',
         slug: p.slug || '',
         sku: p.sku || '',
-        category_id: p.category_id ? String(p.category_id) : '',
+        category_id: p.category_id ? String(p.category_id) : (p.category?.id ? String(p.category.id) : ''),
         brand: p.brand || 'Shopera Studio',
         short_description: p.short_description || '',
         description: p.description || '',
@@ -139,13 +139,13 @@ export const EditProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.price || !form.category_id) {
-      showToast('Please fill all required fields (Name, Category, Price)', 'error');
+      showToast('Please fill all required fields (Name, Category, Price)', 'danger');
       return;
     }
 
     const validImages = images.filter((img) => img.image_url && img.image_url.trim() !== '');
     if (validImages.length === 0) {
-      showToast('Please provide at least one valid Image URL', 'error');
+      showToast('Please provide at least one valid Image URL', 'danger');
       return;
     }
 
@@ -185,7 +185,7 @@ export const EditProduct = () => {
       showToast('Product updated successfully', 'success');
       navigate('/admin/products');
     } catch (err) {
-      showToast(err.response?.data?.message || 'Failed to update product', 'error');
+      showToast(err.message || 'Failed to update product', 'danger');
     } finally {
       setSubmitting(false);
     }

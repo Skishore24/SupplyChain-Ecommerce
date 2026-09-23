@@ -9,16 +9,22 @@ class MetricCard(BaseModel):
     percentage_change: float
     is_positive: bool
     previous_period_value: float
+    current: Optional[float] = None
+    growth_rate: Optional[float] = None
 
 class RevenueDataPoint(BaseModel):
     date: str
     revenue: float
     orders_count: int
+    amount: Optional[float] = None
+    count: Optional[int] = None
 
 class CategorySalesDataPoint(BaseModel):
     category_name: str
     sales: float
     percentage: float
+    category: Optional[str] = None
+    revenue: Optional[float] = None
 
 class TopProductItem(BaseModel):
     id: int
@@ -33,6 +39,7 @@ class CustomerGrowthPoint(BaseModel):
     date: str
     new_customers: int
     total_customers: int
+    count: Optional[int] = None
 
 class RepeatCustomerMetric(BaseModel):
     repeat_rate: float

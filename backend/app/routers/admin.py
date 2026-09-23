@@ -12,7 +12,7 @@ from app.models.order import Order, OrderStatus
 from app.models.category import Category
 from app.schemas.common import ApiResponse, PaginatedApiResponse, PaginatedData
 from app.schemas.user import CustomerAdminView, UserStatusUpdate
-from app.schemas.product import ProductResponse
+from app.schemas.product import ProductResponse, ProductDetailResponse, ProductCreate, ProductUpdate
 from app.schemas.order import OrderResponse
 from app.schemas.analytics import DashboardAnalyticsResponse
 from app.services.analytics_service import analytics_service
@@ -83,6 +83,59 @@ def get_admin_products(
             page_size=page_size,
             total_pages=total_pages
         )
+    )
+
+@router.get("/products/{product_id}", response_model=ApiResponse[ProductDetailResponse])
+def get_admin_product(
+    product_id: int,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    product = product_service.get_by_id(db, product_id)
+    return ApiResponse(
+        success=True,
+        message="Admin product retrieved",
+        data=ProductDetailResponse.model_validate(product)
+    )
+
+@router.post("/products", response_model=ApiResponse[ProductDetailResponse], status_code=status.HTTP_201_CREATED)
+def create_admin_product(
+    prod_in: ProductCreate,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    product = product_service.create_product(db, prod_in)
+    return ApiResponse(
+        success=True,
+        message="Product created successfully",
+        data=ProductDetailResponse.model_validate(product)
+    )
+
+@router.put("/products/{product_id}", response_model=ApiResponse[ProductDetailResponse])
+def update_admin_product(
+    product_id: int,
+    prod_in: ProductUpdate,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    product = product_service.update_product(db, product_id, prod_in)
+    return ApiResponse(
+        success=True,
+        message="Product updated successfully",
+        data=ProductDetailResponse.model_validate(product)
+    )
+
+@router.delete("/products/{product_id}", response_model=ApiResponse[dict])
+def delete_admin_product(
+    product_id: int,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    product_service.delete_product(db, product_id)
+    return ApiResponse(
+        success=True,
+        message="Product deleted successfully",
+        data={"product_id": product_id}
     )
 
 @router.get("/orders", response_model=PaginatedApiResponse[OrderResponse])

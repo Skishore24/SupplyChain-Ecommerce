@@ -1,4 +1,5 @@
 from decimal import Decimal
+from datetime import datetime
 from typing import Optional, List, Tuple
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_, desc, asc
@@ -173,9 +174,22 @@ class ProductService:
         product = ProductService.get_by_id(db, product_id)
         update_data = data.model_dump(exclude_unset=True)
 
+        # Check SKU uniqueness if changed
+        if "sku" in update_data and update_data["sku"] and update_data["sku"] != product.sku:
+            existing_sku = db.query(Product).filter(Product.sku == update_data["sku"], Product.id != product_id).first()
+            if existing_sku:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"SKU '{update_data['sku']}' is already used by another product.")
+
+        # Check slug uniqueness if changed
+        if "slug" in update_data and update_data["slug"] and update_data["slug"] != product.slug:
+            existing_slug = db.query(Product).filter(Product.slug == update_data["slug"], Product.id != product_id).first()
+            if existing_slug:
+                update_data["slug"] = f"{update_data['slug']}-{int(datetime.now().timestamp())}"
+
         # Handle images if provided
         if "images" in update_data and update_data["images"] is not None:
-            db.query(ProductImage).filter(ProductImage.product_id == product.id).delete()
+            product.images.clear()
+            db.flush()
             has_primary = any(img.is_primary for img in data.images)
             for idx, img_data in enumerate(data.images):
                 img = ProductImage(
@@ -190,7 +204,8 @@ class ProductService:
 
         # Handle variants if provided
         if "variants" in update_data and update_data["variants"] is not None:
-            db.query(ProductVariant).filter(ProductVariant.product_id == product.id).delete()
+            product.variants.clear()
+            db.flush()
             for v_data in data.variants:
                 var = ProductVariant(
                     product_id=product.id,
